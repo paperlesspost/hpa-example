@@ -1,20 +1,33 @@
 package main
 
 import (
-	"log"
-	"math"
-	"net/http"
+        "net/http"
+        "time"
+
+        "github.com/prometheus/client_golang/prometheus"
+        "github.com/prometheus/client_golang/prometheus/promauto"
+        "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	x := 0.0001
-	for i := 0; i <= 1000000; i++ {
-		x += math.Sqrt(x)
-	}
-	w.Write([]byte("OK!"))
+func recordMetrics() {
+        go func() {
+                for {
+                        opsProcessed.Inc()
+                        time.Sleep(2 * time.Second)
+                }
+        }()
 }
 
+var (
+        opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+                Name: "myapp_processed_ops_total",
+                Help: "The total number of processed events",
+        })
+)
+
 func main() {
-	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":80", nil))
+        recordMetrics()
+
+        http.Handle("/metrics", promhttp.Handler())
+        http.ListenAndServe(":2112", nil)
 }
