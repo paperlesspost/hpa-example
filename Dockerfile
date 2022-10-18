@@ -1,5 +1,4 @@
-FROM golang:1.10-alpine
-LABEL maintainer="Eric Chang <chiahan1123@gmail.com>"
+FROM golang:1.19.2-alpine
 
 COPY main.go /main.go
 ENTRYPOINT go run /main.go
