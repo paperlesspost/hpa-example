@@ -2,7 +2,7 @@ FROM golang:1 AS builder
 WORKDIR ${GOPATH}/pkg/mod/github.com/prometheus/client_golang
 COPY . .
 WORKDIR ${GOPATH}/pkg/mod/github.com/prometheus/client_golang@v1.13.0/prometheus
-RUN go install paperlesspost.net/hpa-example@latest
+RUN go install hpa-example@latest
 WORKDIR ${GOPATH}/pkg/mod/github.com/prometheus/client_golang@v1.13.0/examples/random
 RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w'
 WORKDIR ${GOPATH}/pkg/mod/github.com/prometheus/client_golang@v1.13.0/examples/simple
