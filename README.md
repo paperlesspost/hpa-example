@@ -21,12 +21,11 @@ go run ./main.go
 curl "http://127.0.0.1:8080/metrics"
 ```
 ### publish to quay
-```
-docker build -t hpa-example .
-export MYTAG="v0.3.0"
-docker tag hpa-example:${MYTAG} quay.io/paperlesspost/hpa-example:${MYTAG}
+
+export HPA_EX_TAG="XXX" # ie "v0.3.0"
+docker build -t hpa-example:${HPA_EX_TAG} .
 docker login -u="XXX" -p="XXX quay.io
-docker tag hpa-example:${MYTAG} quay.io/paperlesspost/hpa-example:${MYTAG}
-docker push quay.io/paperlesspost/hpa-example:${MYTAG}
+docker tag hpa-example:${HPA_EX_TAG} quay.io/paperlesspost/hpa-example:${HPA_EX_TAG}
+docker push quay.io/paperlesspost/hpa-example:${HPA_EX_TAG}
 
 ```
