@@ -16,12 +16,13 @@ go get github.com/prometheus/client_golang/prometheus/promauto
 go get github.com/prometheus/client_golang/prometheus/promhttp
 go mod tidy
 go build ./main.go -o cpustress
-go run ./main.go
+go run ./cpustress
 # from another terminal:
 curl "http://127.0.0.1:8080/metrics"
 ```
 ### publish to quay
 
+```
 export HPA_EX_TAG="XXX" # ie "v0.3.0"
 docker build -t hpa-example:${HPA_EX_TAG} .
 docker login -u="XXX" -p="XXX quay.io
