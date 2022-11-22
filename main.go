@@ -32,8 +32,8 @@ type ExampleMetricResponse struct {
 
 func getMetric(w http.ResponseWriter, req *http.Request) {
 	// pull metric from Settings service
-	resp, err := http.Get("http://earth.ppstaging.net/flyer/api/settings/hpa-example")
-	// resp, err := http.Get("http://settings/settings/hpa-example")
+	// resp, err := http.Get("http://earth.ppstaging.net/flyer/api/settings/hpa-example")
+	resp, err := http.Get("http://settings/settings/hpa-example")
 
 	if err != nil {
 		fmt.Println("error fetching from settings service")
