@@ -4,45 +4,73 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math"
-	"math/rand"
 	"net/http"
-	"runtime"
-	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
-//	"github.com/prometheus/client_golang/prometheus/collectors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"encoding/json"
+	"io/ioutil"
+	"strconv"
 )
 
 var addr = flag.String("listen-address", ":8000", "The address to listen on for HTTP requests.")
 
+// health check fn
 func hello(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "hello\n")
 }
 
-func cpuStress(w http.ResponseWriter, req *http.Request) {
-	var x = float64(1)
-	for i := float64(1); i <= 10000000; i++ {
-    x = i * rand.Float64()
-		fmt.Println(math.Sqrt(float64(x)))
-  }
-  fmt.Println("cpu load done")
+// helper types to decode json from settings svc
+type ValueContainer struct {
+	Value int `json:"value"`
 }
 
+type ExampleMetric struct {
+	ExampleMetric ValueContainer `json:"example_metric"`
+}
+
+type ExampleMetricResponse struct {
+	Data ExampleMetric `json:"data"`
+}
+
+func getMetric(w http.ResponseWriter, req *http.Request) {
+	// pull metric from Settings service
+	resp, err := http.Get("http://earth.ppstaging.net/flyer/api/settings/hpa-example")
+	// resp, err := http.Get("http://settings/settings/hpa-example")
+
+	if err != nil {
+		fmt.Println("error fetching from settings service")
+		return
+	}
+
+	defer resp.Body.Close()
+
+	rawJson, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Println("error reading response")
+		return
+	}
+
+	var metricResponse ExampleMetricResponse
+	err = json.Unmarshal(rawJson, &metricResponse)
+	if err != nil {
+		fmt.Println("error unmarshaling response")
+		return
+	}
+	
+	metricsText := 
+`# HELP example_metric Custom arbitrary value to test example HPA
+# TYPE example_metric gauge
+example_metric ` + strconv.Itoa(metricResponse.Data.ExampleMetric.Value) + "\n"
+
+	fmt.Fprintf(w, metricsText)
+}
 
 func main() {
-	runtime.GOMAXPROCS(1)
-
 	flag.Parse()
 
-	// non-global registry.
-	reg := prometheus.NewRegistry()
+  	http.HandleFunc("/hello", hello)
+	http.HandleFunc("/metrics", getMetric)
 
-  http.HandleFunc("/hello", hello)
-	http.HandleFunc("/load", cpuStress)
-	http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+	fmt.Println("example-hpa app running on port " + *addr)
+
 	log.Fatal(http.ListenAndServe(*addr, nil))
-
-	time.Sleep(1 * time.Nanosecond) // Wait for goroutines to finish
 }
