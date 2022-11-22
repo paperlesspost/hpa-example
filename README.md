@@ -15,10 +15,10 @@ go get github.com/prometheus/client_golang/prometheus/collectors
 go get github.com/prometheus/client_golang/prometheus/promauto
 go get github.com/prometheus/client_golang/prometheus/promhttp
 go mod tidy
-go build ./main.go -o cpustress
-go run ./cpustress
+go build ./main.go
+go run ./main.go
 # from another terminal:
-curl "http://127.0.0.1:8080/metrics"
+curl "http://127.0.0.1:8000/metrics"
 ```
 ### publish to quay
 
